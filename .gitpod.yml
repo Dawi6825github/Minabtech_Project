@@ -1,0 +1,28 @@
+image: gitpod/workspace-full
+
+tasks:
+  - init: |
+      # Install dependencies
+      sudo apt update && sudo apt install -y postgresql-client
+      go install github.com/Khan/genqlient@latest
+      npm install -g @vue/cli vite nuxt
+      npm install vee-validate tailwindcss vue-apollo
+      curl -L https://github.com/hasura/graphql-engine/releases/latest/download/cli_linux_amd64 -o hasura-cli
+      chmod +x hasura-cli
+      mv hasura-cli /usr/local/bin/
+
+  - command: |
+      echo "Workspace Ready!"
+
+ports:
+  - port: 5432
+    onOpen: open-preview
+  - port: 8080
+    onOpen: open-preview
+
+vscode:
+  extensions:
+    - ms-vscode.go
+    - esbenp.prettier-vscode
+    - Vue.volar
+    - GraphQL.vscode-graphql

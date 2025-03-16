@@ -1,0 +1,16 @@
+# Ignore Go build files
+bin/
+*.exe
+*.out
+*.test
+
+# Ignore environment files
+.env
+*.log
+
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore node_modules (if frontend exists)
+node_modules/

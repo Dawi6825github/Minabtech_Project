@@ -1,0 +1,31 @@
+image:
+  file: .gitpod.Dockerfile # Optional: custom Docker image
+
+tasks:
+  - init: |
+      # Install dependencies for Nuxt, Vue, and other tools
+      npm install
+      # Install Golang and other dependencies
+      sudo apt-get install golang-go
+      # Install Hasura CLI for GraphQL engine
+      curl -L https://github.com/hasura/graphql-engine/releases/download/v2.9.0/hasura-cli-linux-amd64 -o hasura
+      chmod +x hasura
+      mv hasura /usr/local/bin/
+  - command: |
+      # Run the app or service in the background (e.g., Postgres, GraphQL server, Golang server)
+      docker-compose up -d
+      npm run dev # Nuxt dev server
+
+ports:
+  - port: 3000
+    onOpen: open-preview # Nuxt will be running on port 3000
+  - port: 4000
+    onOpen: open-preview # GraphQL or any other service can be exposed
+
+vscode:
+  extensions:
+    - ms-vscode.go
+    - dbaeumer.vscode-eslint
+    - octref.vetur # Vue.js support
+    - esbenp.prettier-vscode
+    - golang.go

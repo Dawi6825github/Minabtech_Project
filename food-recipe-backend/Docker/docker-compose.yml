@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  backend:
+    build: 
+      context: ../golang
+      dockerfile: ../docker/Dockerfile
+    container_name: backend_service
+    restart: unless-stopped
+    depends_on:
+      - db
+      - hasura
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/recipesdb?sslmode=disable
+      - JWT_SECRET=mysecretkey
+    ports:
+      - "8080:8080"
+    networks:
+      - backend_network
+
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: recipesdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - backend_network
+
+  hasura:
+    image: hasura/graphql-engine:v2.40.0
+    container_name: hasura_engine
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@db:5432/recipesdb
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: "myadminsecret"
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+    networks:
+      - backend_network
+
+volumes:
+  db_data:
+
+networks:
+  backend_network:
+    driver: bridge

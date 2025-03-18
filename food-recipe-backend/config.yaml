@@ -1,0 +1,56 @@
+version: 3
+tables:
+  - table:
+      schema: public
+      name: recipes
+    permissions:
+      - role: user
+        permission:
+          select:
+            columns: '*'
+          insert:
+            columns: ['title', 'description', 'featuredImage', 'preparationTime', 'category', 'creatorId', 'ingredients', 'steps']
+          update:
+            columns: ['title', 'description', 'featuredImage', 'preparationTime', 'category', 'ingredients', 'steps']
+          delete:
+            columns: ['id']
+  - table:
+      schema: public
+      name: users
+    permissions:
+      - role: user
+        permission:
+          select:
+            columns: ['id', 'username', 'email']
+          insert:
+            columns: ['username', 'password', 'email']
+          update:
+            columns: ['password']
+          delete:
+            columns: ['id']
+actions:
+  - name: createRecipe
+    definition:
+      type: mutation
+      handler: /api/createRecipe
+  - name: likeRecipe
+    definition:
+      type: mutation
+      handler: /api/recipes/:id/like
+  - name: commentOnRecipe
+    definition:
+      type: mutation
+      handler: /api/recipes/:id/comment
+  - name: getRecipeInteractions
+    definition:
+      type: query
+      handler: /api/recipes/:id/interactions
+  - name: getUserRecipes
+  - name: bookmarkRecipe
+    definition:
+      type: mutation
+      handler: /api/recipes/:id/bookmark
+  - name: rateRecipe
+    definition:
+      type: mutation
+      handler: /api/recipes/:id/rate

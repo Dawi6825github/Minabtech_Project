@@ -1,0 +1,81 @@
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Dawittesfaye0900.!
+      POSTGRES_DB: food_recipes
+      HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256", "key": "myjwtsecretkey"}'
+    ports:
+      - "5432:5432"
+
+  graphql-engine:
+    image: hasura/graphql-engine:v2.42.0
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - data-connector-agent
+    environment:
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:Dawittesfaye0900.!@postgres:5432/food_recipes
+      PG_DATABASE_URL: postgres://postgres:Dawittesfaye0900.!@postgres:5432/food_recipes
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+      HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256", "key": "myjwtsecretkey"}'
+      HASURA_GRAPHQL_ENDPOINT: "http://hasura:8080/v1/graphql"
+      HASURA_GRAPHQL_METADATA_DEFAULTS: >-
+        {
+          "backend_configs": {
+            "dataconnector": {
+              "athena": {"uri": "http://data-connector-agent:8081/api/v1/athena"},
+              "mariadb": {"uri": "http://data-connector-agent:8081/api/v1/mariadb"},
+              "mysql8": {"uri": "http://data-connector-agent:8081/api/v1/mysql"},
+              "oracle": {"uri": "http://data-connector-agent:8081/api/v1/oracle"},
+              "snowflake": {"uri": "http://data-connector-agent:8081/api/v1/snowflake"}
+            }
+          }
+        }
+
+  data-connector-agent:
+    image: hasura/graphql-data-connector:v2.42.0
+    restart: always
+    ports:
+      - "8082:8081"
+    environment:
+      QUARKUS_LOG_LEVEL: ERROR
+      QUARKUS_OPENTELEMETRY_ENABLED: "false"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/api/v1/athena/health"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+
+  golang-backend:
+    image: golang:1.19
+    container_name: golang-backend
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["go", "run", "main.go"]
+    ports:
+      - "8083:8080"
+    depends_on:
+      - postgres
+      - graphql-engine
+    environment:
+      DATABASE_URL: postgres://postgres:Dawittesfaye0900.!@postgres:5432/food_recipes
+      HASURA_GRAPHQL_ENDPOINT: http://graphql-engine:8080/v1/graphql
+      JWT_SECRET: myjwtsecretkey
+
+volumes:
+  db_data:

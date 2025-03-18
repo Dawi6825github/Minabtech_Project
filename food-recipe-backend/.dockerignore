@@ -1,0 +1,16 @@
+# Ignore the vendor directory
+vendor/
+
+# Ignore Go build files
+*.exe
+*.exe~
+*.out
+*.test
+
+# Ignore local configuration files
+*.env
+
+# Ignore any other files that are not needed in the container
+node_modules/
+npm-debug.log
+package-lock.json
